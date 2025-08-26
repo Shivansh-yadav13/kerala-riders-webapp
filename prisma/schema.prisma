@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  krid      String  @id
+  email     String  @unique
+  name      String?
+  athleteId String?
+
+  activities Activity[]
+}
+
+model Activity {
+  id             BigInt   @id
+  user           User     @relation(fields: [userKRId], references: [krid])
+  userKRId       String
+  name           String
+  type           String
+  sportType      String
+  distance       Float
+  movingTime     Int
+  elapsedTime    Int
+  totalElevation Float
+  startDate      DateTime
+  startDateLocal DateTime
+  timezone       String?
+
+  averageSpeed Float?
+  maxSpeed     Float?
+  workoutType  Int?
+
+  // kudosCount        Int?
+  // commentCount      Int?
+  // achievementCount  Int?
+
+  // mapId             String?    // strava "map.id"
+  // summaryPolyline   String?    // careful: polylines can get long!
+
+  // visibility        String?
+  // private           Boolean    @default(false)
+
+  createdAt DateTime @default(now())
+}
