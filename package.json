@@ -7,6 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "sync-activities": "tsx scripts/manual-sync.ts --",
     "list-users": "tsx scripts/manual-sync.ts -- --list",
     "list-strava-users": "tsx scripts/list-strava-users.ts",
