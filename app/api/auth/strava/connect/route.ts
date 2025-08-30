@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@supabase/supabase-js';
 import axios from "axios";
 
 const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID || "173716";
@@ -57,24 +57,32 @@ export async function POST(request: NextRequest) {
       athlete 
     } = tokenResponse.data;
 
-    console.log("✅ [Strava Connect] Token exchange successful");
+    console.log("✅ [Strava Connect] Token exchange successful for athlete:", athlete.id);
 
-    // Get user session to verify authentication
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Create admin client for user operations
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
+    // Get user to verify they exist
+    const { data: user, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
     
     if (userError || !user) {
-      console.error("❌ [Strava Connect] No authenticated user found:", userError);
-      return NextResponse.json({ error: "User must be authenticated" }, { status: 401 });
-    }
-
-    if (user.id !== userId) {
-      console.error("❌ [Strava Connect] User ID mismatch");
-      return NextResponse.json({ error: "Invalid user session" }, { status: 403 });
+      console.error("❌ [Strava Connect] User not found:", userError);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Update user metadata with Strava tokens
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: {
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        ...user.user.user_metadata,
         strava_access_token: access_token,
         strava_refresh_token: refresh_token,
         strava_athlete_id: athlete.id,
