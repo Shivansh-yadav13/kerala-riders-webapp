@@ -19,7 +19,64 @@ const STRAVA_SCOPES = [
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("user_id");
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
   
+  // If we have a code, this is a callback from Strava
+  if (code && state) {
+    try {
+      console.log("🚀 [Strava Connect] Processing callback for user:", state);
+
+      // Exchange authorization code for tokens
+      const tokenResponse = await axios.post(
+        `https://www.strava.com/oauth/token?client_id=${STRAVA_CLIENT_ID}&client_secret=${STRAVA_CLIENT_SECRET}&code=${code}&grant_type=authorization_code`
+      );
+
+      const { 
+        access_token, 
+        refresh_token, 
+        expires_at,
+        athlete 
+      } = tokenResponse.data;
+
+      console.log("✅ [Strava Connect] Token exchange successful for athlete:", athlete?.id);
+
+      // Get user from Supabase
+      const { data: user, error: userError } = await supabase.auth.admin.getUserById(state);
+
+      if (userError || !user) {
+        console.error("❌ [Strava Connect] User not found:", userError);
+        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}?error=user_not_found`);
+      }
+
+      // Update user metadata with Strava tokens
+      const { error: updateError } = await supabase.auth.admin.updateUserById(state, {
+        user_metadata: {
+          ...user.user.user_metadata,
+          strava_access_token: access_token,
+          strava_refresh_token: refresh_token,
+          strava_expires_at: expires_at,
+          strava_athlete_id: athlete?.id,
+        },
+      });
+
+      if (updateError) {
+        console.error("❌ [Strava Connect] Failed to update user metadata:", updateError);
+        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}?error=update_failed`);
+      }
+
+      console.log("✅ [Strava Connect] User metadata updated successfully");
+
+      // Redirect back to the app with success
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}?strava_connected=true`);
+
+    } catch (error: any) {
+      console.error("💥 [Strava Connect] Callback error:", error);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}?error=strava_connect_failed`);
+    }
+  }
+
+  // If no code, this is the initial request to start OAuth flow
   if (!userId) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
