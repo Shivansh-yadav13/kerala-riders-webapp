@@ -10,10 +10,14 @@
     "sync-activities": "tsx scripts/manual-sync.ts --",
     "list-users": "tsx scripts/manual-sync.ts -- --list",
     "list-strava-users": "tsx scripts/list-strava-users.ts",
-    "auto-sync": "tsx scripts/auto-sync.ts"
+    "auto-sync": "tsx scripts/auto-sync.ts",
+    "test-strava-auth": "tsx scripts/test-strava-auth.ts",
+    "test-google-auth": "tsx scripts/test-google-auth.ts",
+    "test-email-auth": "tsx scripts/test-email-auth.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.56.0",
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",

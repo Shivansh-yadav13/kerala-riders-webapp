@@ -35,6 +35,7 @@ model Activity {
   elapsedTime    Int
   totalElevation Float
   startDate      DateTime
+  // UTCOffest
   startDateLocal DateTime
   timezone       String?
 
@@ -42,12 +43,22 @@ model Activity {
   maxSpeed     Float?
   workoutType  Int?
 
+  // mapId             String?    // strava "map.id"
+  // summaryPolyline   String?    // careful: polylines can get long!
+  // start lat long
+  // end lat long
+
+  // trainer
+  // manual
+  // pirvate
+  // visibility
+  // upload id / external
+
+  // -----
+
   // kudosCount        Int?
   // commentCount      Int?
   // achievementCount  Int?
-
-  // mapId             String?    // strava "map.id"
-  // summaryPolyline   String?    // careful: polylines can get long!
 
   // visibility        String?
   // private           Boolean    @default(false)
