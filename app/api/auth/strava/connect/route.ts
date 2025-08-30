@@ -4,7 +4,7 @@ import axios from "axios";
 
 const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID || "173716";
 const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET || "6a07e6d7563960d4d0596ed8d6ff3a7146b943b6";
-const REDIRECT_URI = process.env.STRAVA_REDIRECT_URI || "https://keralariders-auth.vercel.app";
+const REDIRECT_URI = process.env.STRAVA_REDIRECT_URI || `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/strava/connect`;
 
 const STRAVA_SCOPES = [
   "read",
