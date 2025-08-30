@@ -512,7 +512,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshUser = async () => {
-    await checkAuthStatus();
+    try {
+      setState(prev => ({ ...prev, loading: true }));
+      
+      // Force refresh the session to get latest user data
+      const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+      
+      if (sessionError) {
+        console.error('❌ [Auth] Session refresh error:', sessionError);
+        await checkAuthStatus(); // Fallback to regular check
+        return;
+      }
+      
+      if (session?.user) {
+        console.log('✅ [Auth] Session refreshed, user metadata:', session.user.user_metadata);
+        setState(prev => ({
+          ...prev,
+          user: session.user,
+          isAuthenticated: true,
+          loading: false,
+          error: null,
+        }));
+      } else {
+        await checkAuthStatus(); // Fallback to regular check
+      }
+    } catch (error) {
+      console.error('💥 [Auth] Refresh user error:', error);
+      await checkAuthStatus(); // Fallback to regular check
+    }
   };
 
   const value: AuthContextType = {

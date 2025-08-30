@@ -11,9 +11,15 @@ function StravaCallbackContent() {
   const { user, refreshUser } = useAuth();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
+    // Prevent multiple concurrent executions
+    if (isProcessing) return;
+
     const processCallback = async () => {
+      // Set processing flag to prevent duplicate calls
+      setIsProcessing(true);
       try {
         const code = searchParams.get('code');
         const state = searchParams.get('state');
@@ -23,6 +29,7 @@ function StravaCallbackContent() {
         if (error === 'access_denied') {
           setStatus('error');
           setErrorMessage('Strava authorization was denied. Please try connecting again.');
+          setIsProcessing(false);
           return;
         }
 
@@ -30,6 +37,7 @@ function StravaCallbackContent() {
         if (!code || !state) {
           setStatus('error');
           setErrorMessage('Invalid callback parameters. Please try connecting again.');
+          setIsProcessing(false);
           return;
         }
 
@@ -69,11 +77,13 @@ function StravaCallbackContent() {
         console.error('💥 [Strava Callback] Unexpected error:', error);
         setStatus('error');
         setErrorMessage('An unexpected error occurred while connecting your Strava account');
+      } finally {
+        setIsProcessing(false);
       }
     };
 
     processCallback();
-  }, [searchParams, refreshUser, router]);
+  }, [searchParams, refreshUser, router, isProcessing]);
 
   const handleRetry = () => {
     router.push('/');

@@ -21,6 +21,12 @@ export function StravaConnection({ user }: StravaConnectionProps) {
     user.user_metadata?.strava_athlete_id
   );
 
+  // Debug logging to see what's in user metadata
+  console.log('🔍 [StravaConnection] User metadata:', user.user_metadata);
+  console.log('🔍 [StravaConnection] Strava connected?', isStravaConnected);
+  console.log('🔍 [StravaConnection] Access token present?', !!user.user_metadata?.strava_access_token);
+  console.log('🔍 [StravaConnection] Athlete ID present?', !!user.user_metadata?.strava_athlete_id);
+
   const handleConnectStrava = () => {
     setLocalError('');
     setSuccessMessage('');
