@@ -43,7 +43,8 @@ export default function StravaBridgePage() {
         if (code) {
           // Detect platform
           const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          const isInApp = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+          const isInApp = ('standalone' in navigator && (navigator as any).standalone) || 
+                         window.matchMedia('(display-mode: standalone)').matches;
           
           const detectedPlatform = platform || (isMobile || isInApp ? 'mobile' : 'web');
           
